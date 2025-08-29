@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Forecast</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" type="image/png" href="https://iili.io/KFfxl07.png">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #6a93cb 0%, #a4bfef 100%);
+            color: #333;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .header {
+            background: #4a7cc0;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .search-container {
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+            background: #f1f7ff;
+        }
+
+        .search-container input {
+            padding: 12px 20px;
+            width: 70%;
+            border: none;
+            border-radius: 30px 0 0 30px;
+            font-size: 16px;
+            outline: none;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .search-container button {
+            padding: 12px 25px;
+            background: #4a7cc0;
+            color: white;
+            border: none;
+            border-radius: 0 30px 30px 0;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .search-container button:hover {
+            background: #3a6cb0;
+        }
+
+        .weather-info {
+            padding: 30px;
+            text-align: center;
+        }
+
+        .current-weather {
+            margin-bottom: 30px;
+        }
+
+        .city-name {
+            font-size: 32px;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+
+        .date {
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+
+        .temp {
+            font-size: 64px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin: 10px 0;
+        }
+
+        .weather-icon {
+            font-size: 50px;
+            margin: 15px 0;
+            color: #4a7cc0;
+        }
+
+        .weather-desc {
+            font-size: 20px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+
+        .weather-details {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            margin-top: 30px;
+        }
+
+        .detail {
+            background: #f1f7ff;
+            border-radius: 15px;
+            padding: 15px;
+            margin: 10px;
+            min-width: 150px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .detail i {
+            font-size: 24px;
+            color: #4a7cc0;
+            margin-bottom: 10px;
+        }
+
+        .forecast {
+            display: flex;
+            justify-content: space-between;
+            overflow-x: auto;
+            padding: 20px 0;
+            margin-top: 20px;
+        }
+
+        .forecast-day {
+            background: #f1f7ff;
+            border-radius: 15px;
+            padding: 15px;
+            min-width: 120px;
+            margin: 0 10px;
+            text-align: center;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .loading {
+            padding: 50px;
+            text-align: center;
+            font-size: 24px;
+            color: #7f8c8d;
+        }
+
+        .error {
+            padding: 30px;
+            text-align: center;
+            color: #e74c3c;
+            font-size: 18px;
+        }
+        
+        /* Footer Styles */
+        footer {
+            text-align: center;
+            padding: 15px;
+            color: white;
+            width: 100%;
+            max-width: 900px;
+        }
+        
+        .contact-info {
+            margin-bottom: 10px;
+        }
+        
+        .contact-link {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s;
+        }
+        
+        .contact-link:hover {
+            color: #e0e0e0;
+            text-decoration: underline;
+        }
+        
+        .copyright {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        @media (max-width: 768px) {
+            .weather-details {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .detail {
+                width: 80%;
+            }
+            
+            .forecast {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .forecast-day {
+                width: 80%;
+                margin: 10px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-cloud-sun"></i> Weather Forecast</h1>
+        </div>
+        
+        <div class="search-container">
+            <input type="text" id="city-input" placeholder="Enter city name...">
+            <button id="search-btn"><i class="fas fa-search"></i> Search</button>
+        </div>
+        
+        <div class="weather-info">
+            <div id="current-weather" class="current-weather">
+                <div class="loading">
+                    <i class="fas fa-sync fa-spin"></i> Loading weather data...
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Footer with contact information -->
+    <footer>
+        <div class="contact-info">
+            <a href="mailto:aswebdev12@gmail.com" class="contact-link">
+                <i class="fas fa-envelope"></i> Contact Us: aswebdev12@gmail.com
+            </a>
+        </div>
+        <div class="copyright">
+            &copy; <span id="current-year"></span> AS-DEV. All rights reserved.
+        </div>
+    </footer>
+   
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const apiKey = '6cd9e64ecc0241a1a80123744252808';
+            const cityInput = document.getElementById('city-input');
+            const searchBtn = document.getElementById('search-btn');
+            const currentWeatherDiv = document.getElementById('current-weather');
+            
+            // Set current year in footer
+            document.getElementById('current-year').textContent = new Date().getFullYear();
+            
+            // Default city
+            let currentCity = 'Islamabad';
+            
+            // Fetch weather data on page load
+            fetchWeatherData(currentCity);
+            
+            // Event listener for search button
+            searchBtn.addEventListener('click', function() {
+                currentCity = cityInput.value.trim();
+                if (currentCity) {
+                    fetchWeatherData(currentCity);
+                }
+            });
+            
+            // Also search when pressing Enter in the input field
+            cityInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    currentCity = cityInput.value.trim();
+                    if (currentCity) {
+                        fetchWeatherData(currentCity);
+                    }
+                }
+            });
+            
+            function fetchWeatherData(city) {
+                currentWeatherDiv.innerHTML = `
+                    <div class="loading">
+                        <i class="fas fa-sync fa-spin"></i> Loading weather data for ${city}...
+                    </div>
+                `;
+                
+                // Fetch current weather
+                fetch(`https://api.weatherapi.com/v1/current.json?key=${apiKey}&q=${city}&aqi=no`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('City not found');
+                    }
+                    return response.json();
+                })
+                .then(currentData => {
+                    // Fetch forecast after current weather is fetched
+                    return fetch(`https://api.weatherapi.com/v1/forecast.json?key=${apiKey}&q=${city}&days=5&aqi=no&alerts=no`)
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Forecast not available');
+                            }
+                            return response.json();
+                        })
+                        .then(forecastData => {
+                            displayWeatherData(currentData, forecastData);
+                        });
+                })
+                .catch(error => {
+                    currentWeatherDiv.innerHTML = `
+                        <div class="error">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <p>${error.message}. Please try another city.</p>
+                        </div>
+                    `;
+                });
+            }
+            
+            function displayWeatherData(currentData, forecastData) {
+                const { location, current } = currentData;
+                const { forecast } = forecastData;
+                
+                // Format current date
+                const currentDate = new Date();
+                const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                const formattedDate = currentDate.toLocaleDateString('en-US', options);
+                
+                // Get weather icon class based on condition code
+                const weatherIcon = getWeatherIcon(current.condition.code, current.is_day);
+                
+                currentWeatherDiv.innerHTML = `
+                    <div class="current-weather">
+                        <h2 class="city-name">${location.name}, ${location.country}</h2>
+                        <p class="date">${formattedDate}</p>
+                        <div class="weather-icon">
+                            <i class="${weatherIcon}"></i>
+                        </div>
+                        <div class="temp">${Math.round(current.temp_c)}°C</div>
+                        <div class="weather-desc">${current.condition.text}</div>
+                        
+                        <div class="weather-details">
+                            <div class="detail">
+                                <i class="fas fa-wind"></i>
+                                <p>Wind</p>
+                                <p>${current.wind_kph} km/h</p>
+                            </div>
+                            <div class="detail">
+                                <i class="fas fa-tint"></i>
+                                <p>Humidity</p>
+                                <p>${current.humidity}%</p>
+                            </div>
+                            <div class="detail">
+                                <i class="fas fa-compress-alt"></i>
+                                <p>Pressure</p>
+                                <p>${current.pressure_mb} hPa</p>
+                            </div>
+                            <div class="detail">
+                                <i class="fas fa-eye"></i>
+                                <p>Visibility</p>
+                                <p>${current.vis_km} km</p>
+                            </div>
+                        </div>
+                        
+                        <h3 style="margin-top: 30px;">5-Day Forecast</h3>
+                        <div class="forecast">
+                            ${forecast.forecastday.map(day => `
+                                <div class="forecast-day">
+                                    <p>${new Date(day.date).toLocaleDateString('en-US', { weekday: 'short' })}</p>
+                                    <div class="weather-icon">
+                                        <i class="${getWeatherIcon(day.day.condition.code, 1)}"></i>
+                                    </div>
+                                    <p>${Math.round(day.day.maxtemp_c)}°C / ${Math.round(day.day.mintemp_c)}°C</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            function getWeatherIcon(code, isDay) {
+                // Map weather condition codes to Font Awesome icons
+                // This is a simplified mapping - you can expand this based on the API's condition codes
+                if (code === 1000) {
+                    return isDay ? 'fas fa-sun' : 'fas fa-moon';
+                } else if (code === 1003 || code === 1006) {
+                    return isDay ? 'fas fa-cloud-sun' : 'fas fa-cloud-moon';
+                } else if (code === 1009 || code === 1030 || code === 1135) {
+                    return 'fas fa-cloud';
+                } else if (code >= 1063 && code <= 1201 || code >= 1180 && code <= 1186) {
+                    return 'fas fa-cloud-rain';
+                } else if (code >= 1204 && code <= 1276) {
+                    return 'fas fa-cloud-showers-heavy';
+                } else if (code >= 1282 && code <= 1282) {
+                    return 'fas fa-cloud-bolt';
+                } else if (code === 1066 || code === 1114 || code === 1210 || code === 1213 || code === 1216 || code === 1225) {
+                    return 'fas fa-snowflake';
+                } else {
+                    return 'fas fa-cloud';
+                }
+            }
+        });
+    </script>
+</body>
+</html>
